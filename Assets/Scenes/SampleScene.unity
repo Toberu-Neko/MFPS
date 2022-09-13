@@ -7150,6 +7150,13 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   orgSpeed: 1000
   sprintSpeed: 1.4
+  jumpForce: 1000
+  ground:
+    serializedVersion: 2
+    m_Bits: 0
+  groundDetector: {fileID: 0}
+  normalCam: {fileID: 1367140740}
+  sprintFOVModifier: 1.45
 --- !u!54 &1818529638
 Rigidbody:
   m_ObjectHideFlags: 0
