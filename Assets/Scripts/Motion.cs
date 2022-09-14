@@ -14,12 +14,23 @@ namespace Com.Neko.SelfLearning
         public Camera normalCam;
         private float defultFOV;
         public float sprintFOVModifier = 1.45f;
-
+        bool jump, jumped = false;
         void Start()
         {
             defultFOV = normalCam.fieldOfView;
             Camera.main.enabled = false;
             rig = GetComponent<Rigidbody>();
+        }
+        private void Update()
+        {
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                jump = true;
+            }if (jumped)
+            {
+                jump = false;
+                jumped = false;
+            }
         }
 
         void FixedUpdate()
@@ -28,7 +39,7 @@ namespace Com.Neko.SelfLearning
             float t_hmove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
             float t_vmove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
-            bool jump = Input.GetKeyDown(KeyCode.Space);
+            //jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
             bool isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
@@ -39,6 +50,7 @@ namespace Com.Neko.SelfLearning
             if (isJumping)
             {
                 rig.AddForce(Vector3.up * jumpForce);
+                jumped = true;
             }
 
             //Movement
