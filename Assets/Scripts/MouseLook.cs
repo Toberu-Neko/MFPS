@@ -6,13 +6,25 @@ namespace Com.Neko.SelfLearning
 {
     public class MouseLook : MonoBehaviour
     {
-        public static bool cursorLocked = true;
-        public Transform player, eyes, camera;
+        #region Variables
+        [Header("玩家物件")]
+        public Transform player;
+        public Transform eyes;
+        public Transform cam;
 
-        public float xSensitivity, ySensitivity;
+        [Header("靈敏度設定")]
+        public float xSensitivity;
+        public float ySensitivity;
+
+        [Header("最大上下角度（+-90）")]
         public float maxAngle;
 
+        public static bool cursorLocked = true;
         private Quaternion camCenter;
+
+        #endregion
+
+        #region Monobehaviour Callbacks
         void Start()
         {
             camCenter = eyes.localRotation;//設定鏡頭+眼睛原始位置
@@ -24,6 +36,9 @@ namespace Com.Neko.SelfLearning
             setX();
             setY();
         }
+        #endregion
+
+        #region Private Methods
         void updateCursorLock()
         {
             if (cursorLocked)
@@ -58,15 +73,16 @@ namespace Com.Neko.SelfLearning
         {
             float t_input = Input.GetAxis("Mouse Y") * ySensitivity * Time.deltaTime;
             Quaternion t_adj = Quaternion.AngleAxis(t_input, -Vector3.right);
-            Quaternion t_delta = camera.localRotation * t_adj;
+            Quaternion t_delta = cam.localRotation * t_adj;
 
 
             if(Quaternion.Angle(camCenter, t_delta) < maxAngle)
             {
                 //eyes.localRotation = t_delta;
-                camera.localRotation = t_delta;
+                cam.localRotation = t_delta;
             }
         }
+        #endregion
     }
 }
 

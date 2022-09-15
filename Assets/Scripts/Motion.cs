@@ -6,15 +6,27 @@ namespace Com.Neko.SelfLearning
 {
     public class Motion : MonoBehaviour
     {
-        public float orgSpeed, sprintSpeed, jumpForce;
-        private Rigidbody rig;
+        #region Variables
+        [Header("玩家速度調整")]
+        public float orgSpeed;
+        [Range(1f, 3f)]
+        public float sprintSpeed;
+        public float jumpForce;
+        [Range(0f, 2f)]
+        public float sprintFOVModifier = 1.45f;
+
+        [Header("附加物件")]
         public LayerMask ground;
         public Transform groundDetector;
-
         public Camera normalCam;
+
         private float defultFOV;
-        public float sprintFOVModifier = 1.45f;
-        bool jump, jumped = false;
+        private Rigidbody rig;
+        //bool jump, jumped = false;
+
+        #endregion
+
+        #region Monobehaviour Callbacks
         void Start()
         {
             defultFOV = normalCam.fieldOfView;
@@ -23,23 +35,13 @@ namespace Com.Neko.SelfLearning
         }
         private void Update()
         {
-            if (Input.GetKeyDown(KeyCode.Space))
-            {
-                jump = true;
-            }if (jumped)
-            {
-                jump = false;
-                jumped = false;
-            }
-        }
-
-        void FixedUpdate()
-        {
-            //Input
+            //Axis
             float t_hmove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
             float t_vmove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
+
+            //Controls
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
-            //jump = Input.GetKeyDown(KeyCode.Space);
+            bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
             bool isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
@@ -50,8 +52,24 @@ namespace Com.Neko.SelfLearning
             if (isJumping)
             {
                 rig.AddForce(Vector3.up * jumpForce);
-                jumped = true;
+                //jumped = true;
             }
+        }
+
+        void FixedUpdate()
+        {
+            //Axis
+            float t_hmove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
+            float t_vmove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
+
+            //Controls
+            bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
+            bool jump = Input.GetKeyDown(KeyCode.Space);
+
+            //States
+            bool isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            bool isJumping = jump && isGrounded;
+            bool isSprinting = sprint && t_vmove > 0 && !isJumping && isGrounded;
 
             //Movement
             Vector3 t_direction = new Vector3(t_hmove, 0, t_vmove);
@@ -78,6 +96,7 @@ namespace Com.Neko.SelfLearning
             }
 
         }
+        #endregion
     }
 }
 
