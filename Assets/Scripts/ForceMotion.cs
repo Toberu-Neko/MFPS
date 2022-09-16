@@ -7,53 +7,69 @@ namespace Com.Neko.SelfLearning
     public class ForceMotion : MonoBehaviour
     {
         #region Variables
-        [Header("玩家速度調整")]
-        public float orgSpeed;
-        [Range(1f, 3f)]
+        private float moveSpeed;//原為orgSpeed
+        [Header("玩家速度")]
+        public float walkSpeed;
         public float sprintSpeed;
+        public float groundDrag;
+        [Range(0f, 0.999f)]
         public float airMultiplier;
+        [Header("跳躍")]
         public float jumpForce;
-        [Range(0f, 2f)]
-        public float sprintFOVModifier = 1.45f;
-        public float groundDrag = 5;
+        public float jumpCooldown;
+        bool readyToJump;
+        [Header("蹲下")]
+        public float crouchSpeed;
+        public float crouchSuckToGorundMutiplier;
+        public float crouchYScale;
+        private float startYScale;
+
+        
+        [Header("Keybind")]
+        public KeyCode jumpKey = KeyCode.Space;
+        public KeyCode sprintKey = KeyCode.LeftShift;
+        public KeyCode crouchKey = KeyCode.C;
+        //public KeyCode keepCrouchKey = KeyCode.LeftControl;
 
         [Header("附加物件")]
         public LayerMask ground;
         public Transform groundDetector;
         public Camera normalCam;
 
+        public MovementState state;
+        private float hMove, vMove;
         private float defultFOV;
-        private float adjustedSpeed;
+        //private float adjustedSpeed;
         private Rigidbody rig;
 
+        bool isGrounded;
         //bool jump, jumped = false;
 
         #endregion
-
         #region Monobehaviour Callbacks
         void Start()
         {
+            crouchKey = KeyCode.C;
             defultFOV = normalCam.fieldOfView;
             Camera.main.enabled = false;
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
+            startYScale = transform.localScale.y;
         }
         private void Update()
         {
-            //Axis
-            float t_hmove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
-            float t_vmove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
+            StateHandler();
+            PlayerInput();
+            SpeedControl();
 
             //Controls
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
             bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
-            bool isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
             bool isJumping = jump && isGrounded;
-            bool isSprinting = sprint && t_vmove > 0 && !isJumping && isGrounded;
-
-            SpeedControl(adjustedSpeed);
+            bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
 
             //Jumping
             if (isJumping)
@@ -71,39 +87,20 @@ namespace Com.Neko.SelfLearning
 
         void FixedUpdate()
         {
-            //Axis
-            float t_hmove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
-            float t_vmove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
-
             //Controls
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
             bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
-            bool isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
             bool isJumping = jump && isGrounded;
-            bool isSprinting = sprint && t_vmove > 0 && !isJumping && isGrounded;
+            //bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
 
-            //Movement
-            Vector3 t_direction = new Vector3(t_hmove, 0, t_vmove);
-            t_direction.Normalize();
-            float t_adjustedSpeed = orgSpeed;
+            Movement();
 
-            if (isSprinting) 
-            {
-                t_adjustedSpeed *= sprintSpeed;
-            }
-            Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * t_adjustedSpeed * Time.deltaTime;
-            /*t_targetVelocity.y = rig.velocity.y;
-            rig.velocity = t_targetVelocity;*/
-            Vector3 t_moveDirection = new Vector3(t_hmove, 0, t_vmove); 
-            if(isGrounded)
-                rig.AddForce(t_targetVelocity * t_adjustedSpeed *10f , ForceMode.Force);
-            if(!isGrounded)
-                rig.AddForce(t_targetVelocity * t_adjustedSpeed * 10f * airMultiplier, ForceMode.Force);
-            adjustedSpeed = t_adjustedSpeed;
+
             //FOV
-            if (isSprinting)
+            /*if (isSprinting)
             {
                 //Lerp(a,b,c)=a經過c秒變成b
                 normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * sprintFOVModifier, Time.deltaTime * 8f);
@@ -111,19 +108,110 @@ namespace Com.Neko.SelfLearning
             else
             {
                 normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV, Time.deltaTime * 8f);
-            }
+            }*/
 
         }
         #endregion
+        #region States
+        public enum MovementState
+        {
+            walking,
+            sprinting,
+            crouching,
+            air
+        }
+        private void StateHandler()
+        {
+            if (Input.GetKey(crouchKey))
+            {
+                state = MovementState.crouching;
+                moveSpeed = crouchSpeed;
+            }
+            else if (isGrounded && Input.GetKey(sprintKey))
+            {
+                state = MovementState.sprinting;
+                moveSpeed = sprintSpeed;
+            }
+            else if(isGrounded)
+            {
+                state = MovementState.walking;
+                moveSpeed = walkSpeed;
+            }
+            else
+            {
+                state = MovementState.air;
+            }
+        }
+        #endregion
 
-        void SpeedControl(float adjustedSpeed)
+        private void PlayerInput()
+        {
+            hMove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
+            vMove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
+
+            if(Input.GetKeyDown(jumpKey) && isGrounded && readyToJump)
+            {
+                //Jump
+                readyToJump = false;
+                Jump();
+                #region Invoke用法（註解）
+                /*
+                public void Invoke(string methodName, float time);
+                    -Invoke ( 委派的funtion,幾秒後開始調用 )
+
+                public void InvokeRepeating(string methodName, float time, float repeatRate);
+                    -InvokeRepeating ( 委派的funtion, 幾秒後開始調用, 開始調用後每幾秒再調用 ) 
+
+                public bool IsInvoking(string methodName);
+                    -IsInvoking ( 委派的funtion ) 判斷是否正在調用中
+                */
+                #endregion
+                Invoke(nameof(resetJump), jumpCooldown);//Invoke(nameof(A), b) A=Function, b=幾秒後執行;
+            }
+            //Crouch
+            if (Input.GetKeyDown(crouchKey))
+            {
+                transform.localScale = new Vector3(transform.localScale.x, crouchYScale, transform.localScale.z);
+                rig.AddForce(Vector3.down * crouchSuckToGorundMutiplier, ForceMode.Impulse);
+            }
+            if (Input.GetKeyUp(crouchKey))
+            {
+                transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
+            }
+        }
+        private void Movement()
+        {
+            //Movement
+            Vector3 t_direction = new Vector3(hMove, 0, vMove);
+            t_direction.Normalize();
+            Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * moveSpeed * Time.deltaTime;
+
+            if (isGrounded)
+                rig.AddForce(t_targetVelocity * moveSpeed * 10f, ForceMode.Force);
+            if (!isGrounded)
+                rig.AddForce(t_targetVelocity * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+            
+        }
+        private void Jump()
+        {
+            //reset t velocity
+            rig.velocity = new Vector3(rig.velocity.x, 0f, rig.velocity.z);
+
+            rig.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);//Vector3.up 不考慮rotation, transform.up考慮
+        }
+        private void resetJump()
+        {
+            readyToJump = true;
+        }
+        
+        private void SpeedControl()
         {
             Vector3 flatVel = new Vector3(rig.velocity.x, 0f, rig.velocity.z);
 
             //limit velocity if needed
-            if(flatVel.magnitude > adjustedSpeed)
+            if(flatVel.magnitude > moveSpeed)
             {
-                Vector3 limitedVel = flatVel.normalized * adjustedSpeed;
+                Vector3 limitedVel = flatVel.normalized * moveSpeed;
                 rig.velocity = new Vector3 (limitedVel.x, rig.velocity.y, limitedVel.z);
             }
         }
