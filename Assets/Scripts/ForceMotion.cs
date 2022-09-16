@@ -4,16 +4,18 @@ using UnityEngine;
 
 namespace Com.Neko.SelfLearning
 {
-    public class Motion : MonoBehaviour
+    public class ForceMotion : MonoBehaviour
     {
         #region Variables
         [Header("玩家速度調整")]
         public float orgSpeed;
         [Range(1f, 3f)]
         public float sprintSpeed;
+        public float airMultiplier;
         public float jumpForce;
         [Range(0f, 2f)]
         public float sprintFOVModifier = 1.45f;
+        public float groundDrag = 5;
 
         [Header("附加物件")]
         public LayerMask ground;
@@ -21,7 +23,9 @@ namespace Com.Neko.SelfLearning
         public Camera normalCam;
 
         private float defultFOV;
+        private float adjustedSpeed;
         private Rigidbody rig;
+
         //bool jump, jumped = false;
 
         #endregion
@@ -49,13 +53,20 @@ namespace Com.Neko.SelfLearning
             bool isJumping = jump && isGrounded;
             bool isSprinting = sprint && t_vmove > 0 && !isJumping && isGrounded;
 
+            SpeedControl(adjustedSpeed);
+
             //Jumping
             if (isJumping)
             {
-                rig.AddForce(Vector3.up * jumpForce);
+                rig.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 //jumped = true;
             }
 
+            //Drag
+            if (isGrounded)
+                rig.drag = groundDrag;
+            else
+                rig.drag = 0;
         }
 
         void FixedUpdate()
@@ -83,11 +94,14 @@ namespace Com.Neko.SelfLearning
                 t_adjustedSpeed *= sprintSpeed;
             }
             Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * t_adjustedSpeed * Time.deltaTime;
-            t_targetVelocity.y = rig.velocity.y;
-            rig.velocity = t_targetVelocity;
-            //Vector3 t_moveDirection = new Vector3(t_hmove, 0, t_vmove); 
-            //rig.AddForce(t_targetVelocity * t_adjustedSpeed *10f , ForceMode.Force);
-
+            /*t_targetVelocity.y = rig.velocity.y;
+            rig.velocity = t_targetVelocity;*/
+            Vector3 t_moveDirection = new Vector3(t_hmove, 0, t_vmove); 
+            if(isGrounded)
+                rig.AddForce(t_targetVelocity * t_adjustedSpeed *10f , ForceMode.Force);
+            if(!isGrounded)
+                rig.AddForce(t_targetVelocity * t_adjustedSpeed * 10f * airMultiplier, ForceMode.Force);
+            adjustedSpeed = t_adjustedSpeed;
             //FOV
             if (isSprinting)
             {
@@ -102,6 +116,17 @@ namespace Com.Neko.SelfLearning
         }
         #endregion
 
+        void SpeedControl(float adjustedSpeed)
+        {
+            Vector3 flatVel = new Vector3(rig.velocity.x, 0f, rig.velocity.z);
+
+            //limit velocity if needed
+            if(flatVel.magnitude > adjustedSpeed)
+            {
+                Vector3 limitedVel = flatVel.normalized * adjustedSpeed;
+                rig.velocity = new Vector3 (limitedVel.x, rig.velocity.y, limitedVel.z);
+            }
+        }
     }
 }
 
