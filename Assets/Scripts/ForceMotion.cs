@@ -35,10 +35,12 @@ namespace Com.Neko.SelfLearning
         public LayerMask ground;
         public Transform groundDetector;
         public Camera normalCam;
+        public Transform orientation;
 
         public MovementState state;
         private float hMove, vMove;
         private float defultFOV;
+        Vector3 movementDirection;
         //private float adjustedSpeed;
         private Rigidbody rig;
 
@@ -181,7 +183,7 @@ namespace Com.Neko.SelfLearning
         }
         private void Movement()
         {
-            //Movement
+            /*//OldMovement
             Vector3 t_direction = new Vector3(hMove, 0, vMove);
             t_direction.Normalize();
             Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * moveSpeed * Time.deltaTime;
@@ -189,8 +191,18 @@ namespace Com.Neko.SelfLearning
             if (isGrounded)
                 rig.AddForce(t_targetVelocity * moveSpeed * 10f, ForceMode.Force);
             if (!isGrounded)
-                rig.AddForce(t_targetVelocity * moveSpeed * 10f * airMultiplier, ForceMode.Force);
-            
+                rig.AddForce(t_targetVelocity * moveSpeed * 10f * airMultiplier, ForceMode.Force);*/
+
+            movementDirection = orientation.forward * vMove + orientation.right * hMove;
+            /*Vector3 t_direction = new Vector3(hMove, 0, vMove);
+            t_direction.Normalize();
+            Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * moveSpeed * Time.deltaTime;*/
+
+            if (isGrounded)
+                rig.AddForce(movementDirection * moveSpeed * 10f, ForceMode.Force);
+            if (!isGrounded)
+                rig.AddForce(movementDirection * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+
         }
         private void Jump()
         {
