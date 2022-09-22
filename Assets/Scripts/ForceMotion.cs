@@ -1,5 +1,8 @@
 using System.Collections;
 using System.Collections.Generic;
+using System.Runtime.InteropServices;
+using TMPro;
+using Unity.Collections;
 using UnityEngine;
 
 namespace Com.Neko.SelfLearning
@@ -12,8 +15,13 @@ namespace Com.Neko.SelfLearning
         public float walkSpeed;
         public float sprintSpeed;
         public float groundDrag;
+        public float slideSpeed;
         [Range(0f, 0.999f)]
         public float airMultiplier;
+
+        private float desiredMoveSpeed;
+        private float lastDesiredMoveSpeed;
+
         [Header("跳躍")]
         public float jumpForce;
         public float jumpCooldown;
@@ -37,13 +45,20 @@ namespace Com.Neko.SelfLearning
         public Camera normalCam;
         public Transform orientation;
 
+
+        [Header("斜坡")]
+        private RaycastHit slopeHit;
+        public float slopeMaxAngle;
+        private bool exitingSlope = false;
+        public bool isSliding = false;
+
         public MovementState state;
         private float hMove, vMove;
         private float defultFOV;
         Vector3 movementDirection;
         //private float adjustedSpeed;
         private Rigidbody rig;
-
+        
         bool isGrounded;
         //bool jump, jumped = false;
 
@@ -69,7 +84,7 @@ namespace Com.Neko.SelfLearning
             bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
-            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.2f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
             bool isJumping = jump && isGrounded;
             bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
 
@@ -94,11 +109,13 @@ namespace Com.Neko.SelfLearning
             bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
-            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.1f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.3f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
             bool isJumping = jump && isGrounded;
             //bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
 
             Movement();
+            //SpeedControl();
+
 
 
             //FOV
@@ -119,30 +136,57 @@ namespace Com.Neko.SelfLearning
         {
             walking,
             sprinting,
+            sliding,
             crouching,
             air
         }
         private void StateHandler()
         {
-            if (Input.GetKey(crouchKey))
+            if (isSliding)
+            {
+                state = MovementState.sliding;
+
+                if (OnSlope() && rig.velocity.y < 0.1f)
+                {
+                    desiredMoveSpeed = slideSpeed;
+                }
+                else
+                {
+                    desiredMoveSpeed = crouchSpeed;
+                }
+            }
+            else if (Input.GetKey(crouchKey))
             {
                 state = MovementState.crouching;
-                moveSpeed = crouchSpeed;
+                desiredMoveSpeed = crouchSpeed;
             }
             else if (isGrounded && Input.GetKey(sprintKey))
             {
                 state = MovementState.sprinting;
-                moveSpeed = sprintSpeed;
+                desiredMoveSpeed = sprintSpeed;
             }
             else if(isGrounded)
             {
                 state = MovementState.walking;
-                moveSpeed = walkSpeed;
+                desiredMoveSpeed = walkSpeed;
             }
             else
             {
                 state = MovementState.air;
             }
+            //檢查是否立即變更desiredMoveSpeed
+            if (Mathf.Abs(desiredMoveSpeed - lastDesiredMoveSpeed) > 4f && moveSpeed != 0) 
+            {
+                StopAllCoroutines();
+                StartCoroutine(SmoothlyLerpMoveSpeed());
+
+            }
+            else
+            {
+                moveSpeed = desiredMoveSpeed;
+                lastDesiredMoveSpeed = desiredMoveSpeed;
+            }
+            
         }
         #endregion
 
@@ -193,19 +237,30 @@ namespace Com.Neko.SelfLearning
             if (!isGrounded)
                 rig.AddForce(t_targetVelocity * moveSpeed * 10f * airMultiplier, ForceMode.Force);*/
 
-            movementDirection = orientation.forward * vMove + orientation.right * hMove;
-            /*Vector3 t_direction = new Vector3(hMove, 0, vMove);
-            t_direction.Normalize();
-            Vector3 t_targetVelocity = transform.TransformDirection(t_direction) * moveSpeed * Time.deltaTime;*/
 
-            if (isGrounded)
+            movementDirection = orientation.forward * vMove + orientation.right * hMove;
+
+            if (OnSlope() && !exitingSlope)
+            {
+                rig.AddForce(GetSlopeMoveDirection(movementDirection) * moveSpeed * 20f, ForceMode.Force);
+
+                if (rig.velocity.y > 0)
+                {
+                    rig.AddForce(Vector3.down * 80f, ForceMode.Force);
+                }
+                //Debug.Log("onSlope");
+            }
+            else if (isGrounded)
                 rig.AddForce(movementDirection * moveSpeed * 10f, ForceMode.Force);
-            if (!isGrounded)
+            else if (!isGrounded)
                 rig.AddForce(movementDirection * moveSpeed * 10f * airMultiplier, ForceMode.Force);
+
+            rig.useGravity = !OnSlope();
 
         }
         private void Jump()
         {
+            exitingSlope = true;
             //reset t velocity
             rig.velocity = new Vector3(rig.velocity.x, 0f, rig.velocity.z);
 
@@ -214,18 +269,67 @@ namespace Com.Neko.SelfLearning
         private void resetJump()
         {
             readyToJump = true;
+
+            exitingSlope = false;
         }
         
         private void SpeedControl()
         {
             Vector3 flatVel = new Vector3(rig.velocity.x, 0f, rig.velocity.z);
 
-            //limit velocity if needed
-            if(flatVel.magnitude > moveSpeed)
+            if (OnSlope() && !exitingSlope)
             {
-                Vector3 limitedVel = flatVel.normalized * moveSpeed;
-                rig.velocity = new Vector3 (limitedVel.x, rig.velocity.y, limitedVel.z);
+                if(rig.velocity.magnitude > moveSpeed)
+                {
+                    rig.velocity = rig.velocity.normalized * moveSpeed;
+                    //Debug.Log(rig.velocity.magnitude);
+                }
             }
+            else
+            {
+                //limit velocity if needed
+                if (flatVel.magnitude > moveSpeed)
+                {
+                    Vector3 limitedVel = flatVel.normalized * moveSpeed;
+                    rig.velocity = new Vector3(limitedVel.x, rig.velocity.y, limitedVel.z);
+                }
+            }
+
+        }
+
+        public bool OnSlope()
+        {
+            //isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.3f, ground);
+            if (Physics.Raycast(groundDetector.position, Vector3.down, out slopeHit, 0.3f))
+            {
+                float angle = Vector3.Angle(Vector3.up, slopeHit.normal);
+                return angle < slopeMaxAngle && angle != 0;
+            }
+            return false;
+        }
+
+        public Vector3 GetSlopeMoveDirection(Vector3 direction)
+        {
+            return Vector3.ProjectOnPlane(direction, slopeHit.normal).normalized;
+        }
+
+        private IEnumerator SmoothlyLerpMoveSpeed()
+        {
+            float t_time = 0;
+            float t_difference = Mathf.Abs(desiredMoveSpeed - moveSpeed);
+            float startValue = moveSpeed;
+
+            while (t_time < t_difference)
+            {
+                moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, t_time / t_difference);
+                t_time += Time.deltaTime;
+                lastDesiredMoveSpeed = desiredMoveSpeed;
+                //moveSpeed = desiredMoveSpeed;
+                yield return null;
+            }
+
+            //moveSpeed = desiredMoveSpeed;
+            
         }
     }
 }
