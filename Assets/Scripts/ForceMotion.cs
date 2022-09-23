@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.InteropServices;
 using TMPro;
 using Unity.Collections;
+using UnityEditor;
 using UnityEngine;
 
 namespace Com.Neko.SelfLearning
@@ -18,6 +19,9 @@ namespace Com.Neko.SelfLearning
         public float slideSpeed;
         [Range(0f, 0.999f)]
         public float airMultiplier;
+        public float speedIncreaseMultiplier;
+        public float slopeIncreaseMultiplier;
+        public float playerHeight;
 
         private float desiredMoveSpeed;
         private float lastDesiredMoveSpeed;
@@ -41,6 +45,7 @@ namespace Com.Neko.SelfLearning
 
         [Header("附加物件")]
         public LayerMask ground;
+        public LayerMask jumpPad;
         public Transform groundDetector;
         public Camera normalCam;
         public Transform orientation;
@@ -50,7 +55,7 @@ namespace Com.Neko.SelfLearning
         private RaycastHit slopeHit;
         public float slopeMaxAngle;
         private bool exitingSlope = false;
-        public bool isSliding = false;
+        public bool isSliding;
 
         public MovementState state;
         private float hMove, vMove;
@@ -66,34 +71,42 @@ namespace Com.Neko.SelfLearning
         #region Monobehaviour Callbacks
         void Start()
         {
-            crouchKey = KeyCode.C;
-            defultFOV = normalCam.fieldOfView;
-            Camera.main.enabled = false;
+            //crouchKey = KeyCode.C;
+            //defultFOV = normalCam.fieldOfView;
+            //Camera.main.enabled = false;
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
+
+            readyToJump = true;
+
             startYScale = transform.localScale.y;
         }
         private void Update()
         {
-            StateHandler();
-            PlayerInput();
-            SpeedControl();
 
+            /*
             //Controls
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
             bool jump = Input.GetKeyDown(KeyCode.Space);
-
+            */
             //States
             isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.2f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
-            bool isJumping = jump && isGrounded;
-            bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
+            //bool isJumping = jump && isGrounded;
+            //bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
+
+
+            PlayerInput();
+            SpeedControl();
+            StateHandler();
+            
+            
 
             //Jumping
-            if (isJumping)
+            /*if (isJumping)
             {
                 rig.AddForce(Vector3.up * jumpForce, ForceMode.Impulse);
                 //jumped = true;
-            }
+            }*/
 
             //Drag
             if (isGrounded)
@@ -105,12 +118,12 @@ namespace Com.Neko.SelfLearning
         void FixedUpdate()
         {
             //Controls
-            bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
-            bool jump = Input.GetKeyDown(KeyCode.Space);
+            //bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
+            //bool jump = Input.GetKeyDown(KeyCode.Space);
 
             //States
-            isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.3f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
-            bool isJumping = jump && isGrounded;
+            //isGrounded = Physics.Raycast(groundDetector.position, Vector3.down, 0.3f, ground);//Raycast(偵測目標位置, 偵測方向, 偵測離主角距離，小於為真, layerMask)
+            //bool isJumping = jump && isGrounded;
             //bool isSprinting = sprint && vMove > 0 && !isJumping && isGrounded;
 
             Movement();
@@ -144,14 +157,15 @@ namespace Com.Neko.SelfLearning
         {
             if (isSliding)
             {
-                state = MovementState.sliding;
-
-                if (OnSlope() && rig.velocity.y < 0.1f)
+                if (OnSlope() && rig.velocity.y < 0.2f)
                 {
+                    state = MovementState.sliding;
+                    
                     desiredMoveSpeed = slideSpeed;
                 }
                 else
                 {
+                    state = MovementState.crouching;
                     desiredMoveSpeed = crouchSpeed;
                 }
             }
@@ -183,10 +197,12 @@ namespace Com.Neko.SelfLearning
             }
             else
             {
+                //
+                //StopAllCoroutines();
                 moveSpeed = desiredMoveSpeed;
-                lastDesiredMoveSpeed = desiredMoveSpeed;
             }
-            
+            lastDesiredMoveSpeed = desiredMoveSpeed;
+
         }
         #endregion
 
@@ -224,6 +240,7 @@ namespace Com.Neko.SelfLearning
             {
                 transform.localScale = new Vector3(transform.localScale.x, startYScale, transform.localScale.z);
             }
+            JumpPad();
         }
         private void Movement()
         {
@@ -322,14 +339,31 @@ namespace Com.Neko.SelfLearning
             while (t_time < t_difference)
             {
                 moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, t_time / t_difference);
-                t_time += Time.deltaTime;
+                if (OnSlope())
+                {
+                    float slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
+                    float slopeAngleIncrease = 1 + (slopeAngle / 90f);
+
+                    t_time +=Time.deltaTime * speedIncreaseMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease;
+                }
+                else
+                t_time += Time.deltaTime * speedIncreaseMultiplier;
                 lastDesiredMoveSpeed = desiredMoveSpeed;
                 //moveSpeed = desiredMoveSpeed;
                 yield return null;
             }
 
-            //moveSpeed = desiredMoveSpeed;
+            moveSpeed = desiredMoveSpeed;
             
+        }
+        private void JumpPad()
+        {
+            bool isOnJumpPad = Physics.Raycast(groundDetector.position, Vector3.down, 0.2f, jumpPad);
+
+            if (isOnJumpPad)
+            {
+                rig.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+            }
         }
     }
 }
