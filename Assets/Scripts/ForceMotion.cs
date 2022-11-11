@@ -17,6 +17,9 @@ namespace Com.Neko.SelfLearning
         public float sprintSpeed;
         public float groundDrag;
         public float slideSpeed;
+        [Range(0f, 2f)]
+        public float sprintFOVModifier = 1.45f;
+
         [Range(0f, 0.999f)]
         public float airMultiplier;
         public float speedIncreaseMultiplier;
@@ -57,6 +60,8 @@ namespace Com.Neko.SelfLearning
         private bool exitingSlope = false;
         public bool isSliding;
 
+        [Header("物件")]
+        public Camera basicCam;
         public MovementState state;
         private float hMove, vMove;
         private float defultFOV;
@@ -74,6 +79,7 @@ namespace Com.Neko.SelfLearning
             //crouchKey = KeyCode.C;
             //defultFOV = normalCam.fieldOfView;
             //Camera.main.enabled = false;
+            defultFOV = basicCam.fieldOfView;
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
 
@@ -155,6 +161,11 @@ namespace Com.Neko.SelfLearning
         }
         private void StateHandler()
         {
+            float FOVset = moveSpeed / walkSpeed *.75f;
+            if (FOVset > 1)
+                FOVset *= .75f;
+            if (FOVset < 1)
+                FOVset *= 1.4f;
             if (isSliding)
             {
                 if (OnSlope() && rig.velocity.y < 0.2f)
@@ -162,34 +173,45 @@ namespace Com.Neko.SelfLearning
                     state = MovementState.sliding;
                     
                     desiredMoveSpeed = slideSpeed;
+
+                    normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
                 }
                 else
                 {
                     state = MovementState.crouching;
                     desiredMoveSpeed = crouchSpeed;
+                    if(FOVset<1)
+                    normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
                 }
             }
             else if (Input.GetKey(crouchKey))
             {
                 state = MovementState.crouching;
                 desiredMoveSpeed = crouchSpeed;
+                normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
+
             }
             else if (isGrounded && Input.GetKey(sprintKey))
             {
                 state = MovementState.sprinting;
                 desiredMoveSpeed = sprintSpeed;
+                normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
+
             }
             else if(isGrounded)
             {
                 state = MovementState.walking;
                 desiredMoveSpeed = walkSpeed;
+                normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV, Time.deltaTime * 8f);
             }
             else
             {
                 state = MovementState.air;
+                normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
+
             }
             //檢查是否立即變更desiredMoveSpeed
-            if (Mathf.Abs(desiredMoveSpeed - lastDesiredMoveSpeed) > 4f && moveSpeed != 0) 
+            if (Mathf.Abs(desiredMoveSpeed - lastDesiredMoveSpeed) > sprintSpeed - walkSpeed && moveSpeed != 0) 
             {
                 StopAllCoroutines();
                 StartCoroutine(SmoothlyLerpMoveSpeed());
@@ -339,15 +361,19 @@ namespace Com.Neko.SelfLearning
             while (t_time < t_difference)
             {
                 moveSpeed = Mathf.Lerp(startValue, desiredMoveSpeed, t_time / t_difference);
-                if (OnSlope())
+                if (OnSlope() && (hMove != 0 &&vMove !=0))
                 {
                     float slopeAngle = Vector3.Angle(Vector3.up, slopeHit.normal);
                     float slopeAngleIncrease = 1 + (slopeAngle / 90f);
 
                     t_time +=Time.deltaTime * speedIncreaseMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease;
                 }
+                else if (hMove != 0 && vMove != 0)
+                {
+                    t_time += -Time.deltaTime ;
+                }
                 else
-                t_time += Time.deltaTime * speedIncreaseMultiplier;
+                    t_time += Time.deltaTime * speedIncreaseMultiplier;
                 lastDesiredMoveSpeed = desiredMoveSpeed;
                 //moveSpeed = desiredMoveSpeed;
                 yield return null;
