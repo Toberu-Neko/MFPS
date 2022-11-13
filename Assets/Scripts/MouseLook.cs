@@ -11,6 +11,7 @@ namespace Com.Neko.SelfLearning
         public Transform player;
         public Transform eyes;
         public Transform cam;
+        public Transform weapon;
 
         [Header("ÆF±Ó«×³]©w")]
         public float xSensitivity;
@@ -32,14 +33,14 @@ namespace Com.Neko.SelfLearning
 
         void Update()
         {
-            updateCursorLock();
-            setX();
-            setY();
+            UpdateCursorLock();
+            SetX();
+            SetY();
         }
         #endregion
 
         #region Private Methods
-        void updateCursorLock()
+        void UpdateCursorLock()
         {
             if (cursorLocked)
             {
@@ -61,7 +62,7 @@ namespace Com.Neko.SelfLearning
                 }
             }
         }
-        void setX()
+        void SetX()
         {
             float t_input = Input.GetAxis("Mouse X") * xSensitivity * Time.deltaTime;
             Quaternion t_adj = Quaternion.AngleAxis(t_input, Vector3.up);
@@ -69,7 +70,7 @@ namespace Com.Neko.SelfLearning
             player.localRotation = t_delta;
 
         }
-        void setY()
+        void SetY()
         {
             float t_input = Input.GetAxis("Mouse Y") * ySensitivity * Time.deltaTime;
             Quaternion t_adj = Quaternion.AngleAxis(t_input, -Vector3.right);
@@ -80,7 +81,9 @@ namespace Com.Neko.SelfLearning
             {
                 //eyes.localRotation = t_delta;
                 cam.localRotation = t_delta;
+                //weapon.localRotation = t_delta;
             }
+            weapon.rotation = cam.rotation;
         }
         #endregion
     }

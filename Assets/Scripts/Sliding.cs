@@ -72,7 +72,7 @@ public class Sliding : MonoBehaviour
         if(!playerMoveScript.OnSlope() || playerRig.velocity.y > -0.1f)
         {
             playerRig.AddForce(inputDirection.normalized * slideForce, ForceMode.Force);
-            slideTimer -= Time.deltaTime;
+            //slideTimer -= Time.deltaTime;
         }
         else
         {

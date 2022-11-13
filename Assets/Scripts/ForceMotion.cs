@@ -368,9 +368,9 @@ namespace Com.Neko.SelfLearning
 
                     t_time +=Time.deltaTime * speedIncreaseMultiplier * slopeIncreaseMultiplier * slopeAngleIncrease;
                 }
-                else if (hMove != 0 && vMove != 0)
+                else if (hMove == 0 && vMove == 0)
                 {
-                    t_time += -Time.deltaTime ;
+                    t_time -= Time.deltaTime * speedIncreaseMultiplier;
                 }
                 else
                     t_time += Time.deltaTime * speedIncreaseMultiplier;
