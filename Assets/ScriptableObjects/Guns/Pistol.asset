@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Pistol
   m_EditorClassIdentifier: 
   gunName: Pistol
-  fireRate: 1
+  fireRate: 0.2
   bloom: 20
   recoil: 7
   kickback: 0.1
