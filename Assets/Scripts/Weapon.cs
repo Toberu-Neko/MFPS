@@ -9,6 +9,9 @@ public class Weapon : MonoBehaviour
     public KeyCode wepon1 = KeyCode.Alpha1;
     //public KeyCode aimKey = KeyCode.Mouse1;
 
+    public GameObject bulletHolePrefab;
+    public LayerMask canBeShot;
+
     private GameObject currentWeapon;
     private int currentIndex;
     private Transform anchor;
@@ -22,7 +25,14 @@ public class Weapon : MonoBehaviour
     void Update()
     {
         if(currentWeapon != null)
-        Aim(Input.GetMouseButton(1));
+        {
+            Aim(Input.GetMouseButton(1));
+
+            if (Input.GetMouseButton(0))
+            {
+                Shoot();
+            }
+        }
 
         if (Input.GetKeyDown(wepon1))
             Equip(0);
@@ -53,5 +63,18 @@ public class Weapon : MonoBehaviour
         anchor = currentWeapon.transform.Find("Anchor");
         statesADS = currentWeapon.transform.Find("States/ADS");
         statesHip = currentWeapon.transform.Find("States/Hip");
+    }
+    void Shoot()
+    {
+        Transform t_spawn = transform.Find("Cameras/Normal Camera");
+
+        RaycastHit t_hit = new RaycastHit();
+        if (Physics.Raycast(t_spawn.position, t_spawn.forward, out t_hit, 1000f, canBeShot))
+        {
+            GameObject t_newHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * 0.001f, Quaternion.identity);
+            t_newHole.transform.LookAt(t_hit.point + t_hit.normal);
+            Destroy(t_newHole, 5f);
+        }
+
     }
 }

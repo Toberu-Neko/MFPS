@@ -37544,7 +37544,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 939096124}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Orientation
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -40642,7 +40642,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1017589891}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Wepon
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44425,7 +44425,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1125975720}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Design
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -45929,7 +45929,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1179841473}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Misc
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46209,7 +46209,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1182863784}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Ground Detect
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -51538,7 +51538,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1314752983}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Cameras
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -53355,7 +53355,7 @@ GameObject:
   - component: {fileID: 1367140738}
   - component: {fileID: 1367140740}
   - component: {fileID: 1367140739}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Normal Camera
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -69490,7 +69490,7 @@ GameObject:
   - component: {fileID: 1818529640}
   - component: {fileID: 1818529641}
   - component: {fileID: 1818529642}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -69662,6 +69662,7 @@ MonoBehaviour:
   crouchSpeed: 5
   crouchSuckToGorundMutiplier: 5
   crouchYScale: 0.5
+  weaponParent: {fileID: 1017589891}
   jumpKey: 32
   sprintKey: 304
   crouchKey: 99
@@ -69676,7 +69677,6 @@ MonoBehaviour:
   orientation: {fileID: 939096124}
   slopeMaxAngle: 39
   isSliding: 0
-  basicCam: {fileID: 1367140740}
   state: 0
 --- !u!114 &1818529641
 MonoBehaviour:
@@ -69712,6 +69712,10 @@ MonoBehaviour:
   - {fileID: 11400000, guid: c4ccd2f030adfc24da673a990f0ac83f, type: 2}
   weaponParent: {fileID: 1017589891}
   wepon1: 49
+  bulletHolePrefab: {fileID: 6230514530734384487, guid: c09061c917f58224285c43bc6417426d, type: 3}
+  canBeShot:
+    serializedVersion: 2
+    m_Bits: 407
 --- !u!1 &1828427805
 GameObject:
   m_ObjectHideFlags: 0
@@ -72793,7 +72797,7 @@ GameObject:
   - component: {fileID: 1891259005}
   - component: {fileID: 1891259008}
   - component: {fileID: 1891259007}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}

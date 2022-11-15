@@ -39,12 +39,20 @@ namespace Com.Neko.SelfLearning
         public float crouchYScale;
         private float startYScale;
 
-        
+        [Header("走路晃動")]
+        public Transform weaponParent;
+        private Vector3 weaponParentOrigin;
+        private float movingTimer;
+        private float standingTimer;
+        private Vector3 targetHeadBobWeaponPosition;
+
         [Header("Keybind")]
         public KeyCode jumpKey = KeyCode.Space;
         public KeyCode sprintKey = KeyCode.LeftShift;
         public KeyCode crouchKey = KeyCode.C;
         //public KeyCode keepCrouchKey = KeyCode.LeftControl;
+
+
 
         [Header("附加物件")]
         public LayerMask ground;
@@ -52,7 +60,7 @@ namespace Com.Neko.SelfLearning
         public Transform groundDetector;
         public Camera normalCam;
         public Transform orientation;
-
+        
 
         [Header("斜坡")]
         private RaycastHit slopeHit;
@@ -61,7 +69,7 @@ namespace Com.Neko.SelfLearning
         public bool isSliding;
 
         [Header("物件")]
-        public Camera basicCam;
+        //public Camera basicCam;
         public MovementState state;
         private float hMove, vMove;
         private float defultFOV;
@@ -79,9 +87,10 @@ namespace Com.Neko.SelfLearning
             //crouchKey = KeyCode.C;
             //defultFOV = normalCam.fieldOfView;
             //Camera.main.enabled = false;
-            defultFOV = basicCam.fieldOfView;
+            defultFOV = normalCam.fieldOfView;
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
+            weaponParentOrigin = weaponParent.localPosition;
 
             readyToJump = true;
 
@@ -119,6 +128,32 @@ namespace Com.Neko.SelfLearning
                 rig.drag = groundDrag;
             else
                 rig.drag = 0;
+
+            if(vMove == 0 && hMove == 0)
+            {
+                HeadBob(standingTimer, 0.025f, 0.025f);
+                standingTimer += Time.deltaTime;
+                weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetHeadBobWeaponPosition, Time.deltaTime * 2f);
+            }
+            else if(state == MovementState.sliding)
+            {
+                HeadBob(standingTimer, 0.025f, 0.025f);
+                standingTimer += Time.deltaTime;
+                weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetHeadBobWeaponPosition, Time.deltaTime * 2f);
+            }
+            else if(state == MovementState.sprinting)
+            {
+                HeadBob(movingTimer, 0.15f, 0.075f);
+                movingTimer += Time.deltaTime * 7;
+                weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetHeadBobWeaponPosition, Time.deltaTime * 6f);
+            }
+            else
+            {
+                HeadBob(movingTimer, 0.035f, 0.035f);
+                movingTimer += Time.deltaTime * (moveSpeed / 2f);
+                weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetHeadBobWeaponPosition, Time.deltaTime * 6f);
+            }
+            //weaponParent.localPosition = Vector3.Lerp(weaponParent.localPosition, targetHeadBobWeaponPosition, Time.deltaTime * 8f);
         }
 
         void FixedUpdate()
@@ -388,8 +423,13 @@ namespace Com.Neko.SelfLearning
 
             if (isOnJumpPad)
             {
-                rig.AddForce(Vector3.up * 2f, ForceMode.Impulse);
+                rig.velocity = (Vector3.up * 10f);
             }
+        }
+
+        void HeadBob(float p_z, float p_XIntensity, float p_YIntensity)
+        {
+            targetHeadBobWeaponPosition = weaponParentOrigin + new Vector3(Mathf.Cos(p_z) * p_XIntensity, Mathf.Sin(p_z * 2) * p_YIntensity, weaponParentOrigin.z) ;
         }
     }
 }
