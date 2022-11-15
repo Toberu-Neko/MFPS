@@ -1,14 +1,10 @@
 using System.Collections;
-using System.Collections.Generic;
-using System.Runtime.InteropServices;
-using TMPro;
-using Unity.Collections;
-using UnityEditor;
 using UnityEngine;
+using Photon.Pun;
 
 namespace Com.Neko.SelfLearning
 {
-    public class ForceMotion : MonoBehaviour
+    public class ForceMotion : MonoBehaviourPunCallbacks
     {
         #region Variables
         private float moveSpeed;//­ì¬°orgSpeed
@@ -98,7 +94,10 @@ namespace Com.Neko.SelfLearning
         }
         private void Update()
         {
-
+            if (!photonView.IsMine)
+            {
+                return;
+            }
             /*
             //Controls
             bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
@@ -158,6 +157,10 @@ namespace Com.Neko.SelfLearning
 
         void FixedUpdate()
         {
+            if (!photonView.IsMine)
+            {
+                return;
+            }
             //Controls
             //bool sprint = Input.GetKey(KeyCode.RightShift) || Input.GetKey(KeyCode.LeftShift);
             //bool jump = Input.GetKeyDown(KeyCode.Space);

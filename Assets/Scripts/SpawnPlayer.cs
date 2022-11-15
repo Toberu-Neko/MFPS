@@ -3,8 +3,12 @@ using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 
-public class Launcher : MonoBehaviour
+public class SpawnPlayer : MonoBehaviour
 {
+    public string playerPrefab;
+    public Transform spawnPosition;
+
+    
     #region Variables
 
     #endregion
@@ -13,7 +17,7 @@ public class Launcher : MonoBehaviour
 
     void Start()
     {
-        
+        Spawn();
     }
 
     void Update()
@@ -22,22 +26,9 @@ public class Launcher : MonoBehaviour
     }
 
     #endregion
-    public void OnEnable()
+    public void Spawn()
     {
-        PhotonNetwork.AutomaticallySyncScene = true;
-        Connect();
-    }
-    public void Connect()
-    {
-
-    }
-    public void Join()
-    {
-
-    }
-    public void StartGame()
-    {
-
+        PhotonNetwork.Instantiate(playerPrefab, spawnPosition.position, spawnPosition.rotation);
     }
 
     #region Private Methods
