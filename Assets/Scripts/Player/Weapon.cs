@@ -1,8 +1,9 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Weapon : MonoBehaviour
+public class Weapon : MonoBehaviourPunCallbacks
 {
     public Gun[] loadOut;
     public Transform weaponParent;
@@ -20,12 +21,16 @@ public class Weapon : MonoBehaviour
     private Transform statesHip;
     void Start()
     {
-        
+
     }
 
     void Update()
     {
-        if(currentWeapon != null)
+        if (!photonView.IsMine)
+        {
+            return;
+        }
+        if (currentWeapon != null)
         {
             Aim(Input.GetMouseButton(1));
 

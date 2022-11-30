@@ -1,10 +1,11 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 namespace Com.Neko.SelfLearning
 {
-    public class MouseLook : MonoBehaviour
+    public class MouseLook : MonoBehaviourPunCallbacks
     {
         #region Variables
         [Header("ª±®aª«¥ó")]
@@ -33,6 +34,10 @@ namespace Com.Neko.SelfLearning
 
         void Update()
         {
+            if (!photonView.IsMine)
+            {
+                return;
+            }
             UpdateCursorLock();
             SetX();
             SetY();

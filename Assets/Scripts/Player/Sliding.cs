@@ -1,10 +1,11 @@
 using Com.Neko.SelfLearning;
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 
-public class Sliding : MonoBehaviour
+public class Sliding : MonoBehaviourPunCallbacks
 {
     [Header("≈‹º∆")]
     public Transform orientation;
@@ -36,6 +37,10 @@ public class Sliding : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (!photonView.IsMine)
+        {
+            return;
+        }
         h_Input = Input.GetAxisRaw("Horizontal");
         v_Input = Input.GetAxisRaw("Vertical");
 

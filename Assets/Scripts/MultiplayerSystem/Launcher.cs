@@ -53,6 +53,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public void Join()
     {
+        Debug.Log("Joined Room");
         PhotonNetwork.JoinRandomRoom();
     }
     public void StartGame()
@@ -64,6 +65,7 @@ public class Launcher : MonoBehaviourPunCallbacks
     }
     public void CreateRoom()
     {
+        Debug.Log("Created Room");
         PhotonNetwork.CreateRoom("");
     }
 

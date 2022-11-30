@@ -81,6 +81,7 @@ GameObject:
   - component: {fileID: 6958396080663232847}
   - component: {fileID: 6958396080663232844}
   - component: {fileID: 4700789287978593192}
+  - component: {fileID: 2751601641556442167}
   m_Layer: 9
   m_Name: Player
   m_TagString: Untagged
@@ -266,6 +267,7 @@ MonoBehaviour:
   groundDetector: {fileID: 6958396081302577038}
   normalCam: {fileID: 6958396081688242082}
   orientation: {fileID: 6958396079985063450}
+  cameraParent: {fileID: 6958396081165961200}
   slopeMaxAngle: 39
   isSliding: 0
   state: 0
@@ -324,11 +326,28 @@ MonoBehaviour:
   prefixField: -1
   Synchronization: 2
   OwnershipTransfer: 0
-  observableSearch: 2
-  ObservedComponents: []
+  observableSearch: 0
+  ObservedComponents:
+  - {fileID: 2751601641556442167}
   sceneViewId: 0
   InstantiationId: 0
   isRuntimeInstantiated: 0
+--- !u!114 &2751601641556442167
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6958396080663232838}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 627855c7f81362d41938ffe0b1475957, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_SynchronizePosition: 1
+  m_SynchronizeRotation: 1
+  m_SynchronizeScale: 0
+  m_UseLocal: 1
 --- !u!1 &6958396081138424922
 GameObject:
   m_ObjectHideFlags: 0
@@ -427,7 +446,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &6958396081165961201
 Transform:
   m_ObjectHideFlags: 0

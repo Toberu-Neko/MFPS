@@ -56,6 +56,7 @@ namespace Com.Neko.SelfLearning
         public Transform groundDetector;
         public Camera normalCam;
         public Transform orientation;
+        public GameObject cameraParent;
         
 
         [Header("±×©Y")]
@@ -80,10 +81,16 @@ namespace Com.Neko.SelfLearning
         #region Monobehaviour Callbacks
         void Start()
         {
+            cameraParent.SetActive(photonView.IsMine);
+
+
             //crouchKey = KeyCode.C;
             //defultFOV = normalCam.fieldOfView;
             //Camera.main.enabled = false;
-            defultFOV = normalCam.fieldOfView;
+            if(normalCam != null)
+            {
+               defultFOV = normalCam.fieldOfView;
+            }
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
             weaponParentOrigin = weaponParent.localPosition;

@@ -1,26 +1,37 @@
+using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 
 
-public class Sway : MonoBehaviour
+public class Sway : MonoBehaviourPunCallbacks
 {
     #region Variables
 
     public float intensity;
     public float smooth;
 
+    private Transform player;
     private Quaternion orginRotation;
     #endregion
 
     #region MonoBehaviour Callbacks
     private void Start()
     {
+        player = transform.root;
+        if (!player.gameObject.GetPhotonView().IsMine)
+            this.enabled = false;
+
+
         orginRotation = transform.localRotation;
     }
     private void Update()
     {
+        if (!photonView.IsMine)
+        {
+            return;
+        }
         UpdateSway();
     }
     #endregion
