@@ -76,7 +76,6 @@ GameObject:
   - component: {fileID: 6958396080663232839}
   - component: {fileID: 6958396080663232832}
   - component: {fileID: 6958396080663232833}
-  - component: {fileID: 6958396080663232835}
   - component: {fileID: 6958396080663232846}
   - component: {fileID: 6958396080663232847}
   - component: {fileID: 6958396080663232844}
@@ -207,27 +206,6 @@ MonoBehaviour:
   xSensitivity: 500
   ySensitivity: 500
   maxAngle: 90
---- !u!114 &6958396080663232835
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6958396080663232838}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 08544ec678eeb314ea585fe255307a4c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  orgSpeed: 1000
-  sprintSpeed: 1.4
-  jumpForce: 600
-  sprintFOVModifier: 1.45
-  ground:
-    serializedVersion: 2
-    m_Bits: 256
-  groundDetector: {fileID: 6958396081302577038}
-  normalCam: {fileID: 6958396081688242082}
 --- !u!114 &6958396080663232846
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -308,7 +286,7 @@ MonoBehaviour:
   bulletHolePrefab: {fileID: 6230514530734384487, guid: c09061c917f58224285c43bc6417426d, type: 3}
   canBeShot:
     serializedVersion: 2
-    m_Bits: 407
+    m_Bits: 2455
 --- !u!114 &4700789287978593192
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -346,7 +324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_SynchronizePosition: 1
   m_SynchronizeRotation: 1
-  m_SynchronizeScale: 0
+  m_SynchronizeScale: 1
   m_UseLocal: 1
 --- !u!1 &6958396081138424922
 GameObject:

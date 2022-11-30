@@ -83,10 +83,15 @@ namespace Com.Neko.SelfLearning
         {
             cameraParent.SetActive(photonView.IsMine);
 
+            if (!photonView.IsMine)
+            {
+                gameObject.layer = 11;
+            }
 
-            //crouchKey = KeyCode.C;
-            //defultFOV = normalCam.fieldOfView;
-            //Camera.main.enabled = false;
+            if (Camera.main)
+            {
+                Camera.main.enabled = false;
+            }
             if(normalCam != null)
             {
                defultFOV = normalCam.fieldOfView;

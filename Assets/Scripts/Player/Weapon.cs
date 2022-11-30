@@ -30,13 +30,19 @@ public class Weapon : MonoBehaviourPunCallbacks
         {
             return;
         }
+
+        if (Input.GetKeyDown(wepon1))
+        {
+            photonView.RPC("Equip", RpcTarget.All, 0);
+        }
+            
         if (currentWeapon != null)
         {
             Aim(Input.GetMouseButton(1));
 
             if (Input.GetMouseButtonDown(0) && currentCooldown <= 0)
             {
-                Shoot();
+                photonView.RPC("Shoot", RpcTarget.All, 0);
             }
 
             //weapon position comeback
@@ -46,8 +52,7 @@ public class Weapon : MonoBehaviourPunCallbacks
                 currentCooldown -= Time.deltaTime;
         }
 
-        if (Input.GetKeyDown(wepon1))
-            Equip(0);
+
     }
     void Aim(bool p_isAiming)
     {
@@ -60,6 +65,7 @@ public class Weapon : MonoBehaviourPunCallbacks
             anchor.position = Vector3.Lerp(anchor.position, statesHip.position, Time.deltaTime * loadOut[currentIndex].aimSpeed);
         }
     }
+    [PunRPC]
     void Equip(int p_index)
     {
         if(currentWeapon != null)
@@ -76,8 +82,10 @@ public class Weapon : MonoBehaviourPunCallbacks
         statesADS = currentWeapon.transform.Find("States/ADS");
         statesHip = currentWeapon.transform.Find("States/Hip");
     }
+    [PunRPC]
     void Shoot()
     {
+
         Transform t_spawn = transform.Find("Cameras/Normal Camera");
 
         //bloom
@@ -94,6 +102,15 @@ public class Weapon : MonoBehaviourPunCallbacks
             GameObject t_newHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * 0.001f, Quaternion.identity);
             t_newHole.transform.LookAt(t_hit.point + t_hit.normal);
             Destroy(t_newHole, 5f);
+
+            if(photonView.IsMine)
+            {
+                //if shotting player
+                if(t_hit.collider.gameObject.layer == 11)
+                {
+                    //RPC call damage player.
+                }
+            }
         }
 
         //gun fx
@@ -102,5 +119,7 @@ public class Weapon : MonoBehaviourPunCallbacks
 
         //cooldown
         currentCooldown = loadOut[currentIndex].fireRate;
+
+
     }
 }
