@@ -73,7 +73,8 @@ namespace Com.Neko.SelfLearning
         Vector3 movementDirection;
         //private float adjustedSpeed;
         private Rigidbody rig;
-        
+
+        float startTimer;
         bool isGrounded;
         //bool jump, jumped = false;
 
@@ -81,6 +82,7 @@ namespace Com.Neko.SelfLearning
         #region Monobehaviour Callbacks
         void Start()
         {
+            startTimer = 0;
             cameraParent.SetActive(photonView.IsMine);
 
             if (!photonView.IsMine)
@@ -96,6 +98,7 @@ namespace Com.Neko.SelfLearning
             {
                defultFOV = normalCam.fieldOfView;
             }
+            //moveSpeed = walkSpeed;
             rig = GetComponent<Rigidbody>();
             rig.freezeRotation = true;
             weaponParentOrigin = weaponParent.localPosition;
@@ -106,6 +109,11 @@ namespace Com.Neko.SelfLearning
         }
         private void Update()
         {
+            if(startTimer <= 1)
+            {
+                startTimer += Time.deltaTime;
+            }
+            //Debug.Log(normalCam.fieldOfView);
             if (!photonView.IsMine)
             {
                 return;
@@ -257,7 +265,8 @@ namespace Com.Neko.SelfLearning
             else
             {
                 state = MovementState.air;
-                normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
+                //if (startTimer > 1)
+                //normalCam.fieldOfView = Mathf.Lerp(normalCam.fieldOfView, defultFOV * FOVset, Time.deltaTime * 8f);
 
             }
             //檢查是否立即變更desiredMoveSpeed
@@ -269,7 +278,6 @@ namespace Com.Neko.SelfLearning
             }
             else
             {
-                //
                 //StopAllCoroutines();
                 moveSpeed = desiredMoveSpeed;
             }
@@ -282,8 +290,8 @@ namespace Com.Neko.SelfLearning
         {
             hMove = Input.GetAxisRaw("Horizontal");//水平A+1, D-1
             vMove = Input.GetAxisRaw("Vertical");//垂直W+1, S=1
-
-            if(Input.GetKeyDown(jumpKey) && isGrounded && readyToJump)
+            
+            if (Input.GetKeyDown(jumpKey) && isGrounded && readyToJump)
             {
                 //Jump
                 readyToJump = false;

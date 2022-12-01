@@ -6,12 +6,8 @@ using Photon.Pun;
 public class SpawnPlayer : MonoBehaviour
 {
     public string playerPrefab;
-    public Transform spawnPosition;
+    public Transform[] spawnPositions;
 
-    
-    #region Variables
-
-    #endregion
 
     #region MonoBehaviour Callbacks
 
@@ -28,7 +24,8 @@ public class SpawnPlayer : MonoBehaviour
     #endregion
     public void Spawn()
     {
-        PhotonNetwork.Instantiate(playerPrefab, spawnPosition.position, spawnPosition.rotation);
+        Transform t_spawn = spawnPositions[Random.Range(0,spawnPositions.Length)];
+        PhotonNetwork.Instantiate(playerPrefab, t_spawn.position, t_spawn.rotation);
     }
 
     #region Private Methods

@@ -252,7 +252,7 @@ MonoBehaviour:
   crouchKey: 99
   ground:
     serializedVersion: 2
-    m_Bits: 256
+    m_Bits: 2304
   jumpPad:
     serializedVersion: 2
     m_Bits: 128

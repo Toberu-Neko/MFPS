@@ -29,6 +29,7 @@ public class Weapon : MonoBehaviourPunCallbacks
     {
         if (!photonView.IsMine)
         {
+            currentWeapon.transform.localPosition = Vector3.Lerp(currentWeapon.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
             return;
         }
 
