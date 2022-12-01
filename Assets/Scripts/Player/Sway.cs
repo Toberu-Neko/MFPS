@@ -20,18 +20,15 @@ public class Sway : MonoBehaviourPunCallbacks
     private void Start()
     {
         player = transform.root;
-        if (!player.gameObject.GetPhotonView().IsMine)
-            this.enabled = false;
+        //if (!player.gameObject.GetPhotonView().IsMine)
+        //    enabled = false;
 
 
         orginRotation = transform.localRotation;
     }
     private void Update()
     {
-        if (!photonView.IsMine)
-        {
-            return;
-        }
+
         UpdateSway();
     }
     #endregion
@@ -44,7 +41,13 @@ public class Sway : MonoBehaviourPunCallbacks
         float t_x_mouse = Input.GetAxis("Mouse X");
         float t_y_mouse = Input.GetAxis("Mouse Y");
 
-        //calculate target rotation
+        if (!player.gameObject.GetPhotonView().IsMine)
+        {
+            t_x_mouse = 0;
+            t_y_mouse = 0;
+            
+        }
+            //calculate target rotation
         Quaternion t_Xadj = Quaternion.AngleAxis(-intensity * t_x_mouse, Vector3.up);
         Quaternion t_Yadj = Quaternion.AngleAxis(intensity * t_y_mouse, Vector3.right);
         Quaternion targetRotation = orginRotation * t_Xadj * t_Yadj;

@@ -19,9 +19,10 @@ public class Weapon : MonoBehaviourPunCallbacks
     private Transform anchor;
     private Transform statesADS;
     private Transform statesHip;
+    private PlayerStatus playerStatus;
     void Start()
     {
-
+        playerStatus = GetComponent<PlayerStatus>();
     }
 
     void Update()
@@ -96,7 +97,7 @@ public class Weapon : MonoBehaviourPunCallbacks
         t_bloom.Normalize();
 
         //raycast
-        RaycastHit t_hit = new RaycastHit();
+        RaycastHit t_hit;
         if (Physics.Raycast(t_spawn.position, t_bloom, out t_hit, 1000f, canBeShot))
         {
             GameObject t_newHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * 0.001f, Quaternion.identity);
@@ -109,6 +110,9 @@ public class Weapon : MonoBehaviourPunCallbacks
                 if(t_hit.collider.gameObject.layer == 11)
                 {
                     //RPC call damage player.
+                    //Debug.Log(t_hit.collider.gameObject.GetPhotonView());
+                    t_hit.collider.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadOut[currentIndex].damage);
+                    //playerStatus = t_hit.collider.gameObject.GetComponent<PlayerStatus>(); 
                 }
             }
         }
@@ -121,5 +125,10 @@ public class Weapon : MonoBehaviourPunCallbacks
         currentCooldown = loadOut[currentIndex].fireRate;
 
 
+    }
+    [PunRPC]
+    void TakeDamage(int _damage)
+    {
+        playerStatus.TakeDamage(_damage);
     }
 }
