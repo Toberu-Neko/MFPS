@@ -42,7 +42,7 @@ public class Weapon : MonoBehaviourPunCallbacks
 
             if (Input.GetMouseButtonDown(0) && currentCooldown <= 0)
             {
-                photonView.RPC("Shoot", RpcTarget.All, 0);
+                photonView.RPC("Shoot", RpcTarget.All);
             }
 
             //weapon position comeback
