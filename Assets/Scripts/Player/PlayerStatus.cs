@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using Photon.Pun;
 
 public class PlayerStatus : MonoBehaviourPunCallbacks
@@ -9,6 +10,9 @@ public class PlayerStatus : MonoBehaviourPunCallbacks
     private Slider healthBar;
     [SerializeField]private int maxHealth;
     private int currentHealth;
+
+    private TextMeshProUGUI ammoText;
+    private Weapon weapon;
     private SpawnPlayer spawnPlayer;
     float orgHealth;
     void Start()
@@ -23,6 +27,10 @@ public class PlayerStatus : MonoBehaviourPunCallbacks
             healthBar.maxValue = maxHealth;
             healthBar.value = currentHealth;
             orgHealth = currentHealth;
+
+            ammoText = UIManager.get.UI.transform.Find("HUD/Ammo/AmmoText").gameObject.GetComponent<TextMeshProUGUI>();
+
+            weapon = GetComponent<Weapon>();
         }
     }
 
@@ -40,6 +48,8 @@ public class PlayerStatus : MonoBehaviourPunCallbacks
             {
                 TakeDamage(maxHealth);
             }
+
+            weapon.RefreshAmmoUI(ammoText);
         }
     }
     void RefreshHealthBar(float _current, float _target)

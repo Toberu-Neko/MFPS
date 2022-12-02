@@ -1,6 +1,7 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 
 public class Weapon : MonoBehaviourPunCallbacks
@@ -20,9 +21,16 @@ public class Weapon : MonoBehaviourPunCallbacks
     private Transform statesADS;
     private Transform statesHip;
     private PlayerStatus playerStatus;
+    private bool isRealoading;
     void Start()
     {
         playerStatus = GetComponent<PlayerStatus>();
+
+        foreach(Gun gun in loadOut)
+        {
+            gun.Initalize();
+        }
+        Equip(0);
     }
 
     void Update()
@@ -42,16 +50,29 @@ public class Weapon : MonoBehaviourPunCallbacks
         {
             Aim(Input.GetMouseButton(1));
 
-            if (Input.GetMouseButtonDown(0) && currentCooldown <= 0)
+            if (Input.GetMouseButtonDown(0) && currentCooldown <= 0 && !isRealoading)
             {
-                photonView.RPC("Shoot", RpcTarget.All);
+                if (loadOut[currentIndex].FireBullet())
+                {
+                    photonView.RPC("Shoot", RpcTarget.All);
+                }
+                else if(loadOut[currentIndex].GetStash() != 0 && !isRealoading)
+                {
+                    StartCoroutine(Reload(loadOut[currentIndex].reloadTime));
+                }
+            }
+            if (Input.GetKeyDown(KeyCode.R) && !isRealoading && loadOut[currentIndex].GetStash() != 0)
+            {
+                StartCoroutine(Reload(loadOut[currentIndex].reloadTime));
             }
 
             //weapon position comeback
             currentWeapon.transform.localPosition = Vector3.Lerp(currentWeapon.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
 
             if (currentCooldown > 0)
+            {
                 currentCooldown -= Time.deltaTime;
+            }
         }
 
 
@@ -67,11 +88,26 @@ public class Weapon : MonoBehaviourPunCallbacks
             anchor.position = Vector3.Lerp(anchor.position, statesHip.position, Time.deltaTime * loadOut[currentIndex].aimSpeed);
         }
     }
+    IEnumerator Reload(float _wait)
+    {
+        isRealoading = true;
+        currentWeapon.SetActive(false);
+        yield return new WaitForSeconds(_wait);
+        currentWeapon.SetActive(true);
+        loadOut[currentIndex].Reload();
+        isRealoading = false;
+    }
     [PunRPC]
     void Equip(int p_index)
     {
         if(currentWeapon != null)
         {
+            if(isRealoading)
+            {
+                StopCoroutine("Reload");
+                isRealoading = false;
+            }
+            
             Destroy(currentWeapon);
         }
         currentIndex = p_index;
@@ -103,6 +139,7 @@ public class Weapon : MonoBehaviourPunCallbacks
         {
             GameObject t_newHole = Instantiate(bulletHolePrefab, t_hit.point + t_hit.normal * 0.001f, Quaternion.identity);
             t_newHole.transform.LookAt(t_hit.point + t_hit.normal);
+            //t_newHole.transform.parent = t_hit.rigidbody.gameObject.transform;
             Destroy(t_newHole, 5f);
 
             if(photonView.IsMine)
@@ -126,6 +163,10 @@ public class Weapon : MonoBehaviourPunCallbacks
         currentCooldown = loadOut[currentIndex].fireRate;
 
 
+    }
+    public void RefreshAmmoUI(TextMeshProUGUI text)
+    {
+        text.text = loadOut[currentIndex].GetClip().ToString("D2") + " / " + loadOut[currentIndex].GetStash().ToString("D2");
     }
     [PunRPC]
     void TakeDamage(int _damage)

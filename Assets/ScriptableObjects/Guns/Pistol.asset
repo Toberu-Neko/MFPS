@@ -14,7 +14,10 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gunName: Pistol
   damage: 10
-  fireRate: 0.2
+  fireRate: 0.1
+  ammo: 20
+  clipSize: 8
+  reloadTime: 1.5
   bloom: 20
   recoil: 7
   kickback: 0.1

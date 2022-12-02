@@ -10,13 +10,5 @@ public class UIManager : MonoBehaviour
         get = this;
     }
     public GameObject UI;
-    void Start()
-    {
-        
-    }
 
-    void Update()
-    {
-        
-    }
 }
