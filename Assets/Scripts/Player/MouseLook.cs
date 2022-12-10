@@ -5,7 +5,7 @@ using UnityEngine;
 
 namespace Com.Neko.SelfLearning
 {
-    public class MouseLook : MonoBehaviourPunCallbacks
+    public class MouseLook : MonoBehaviourPunCallbacks, IPunObservable
     {
         #region Variables
         [Header("ª±®aª«¥ó")]
@@ -24,8 +24,20 @@ namespace Com.Neko.SelfLearning
         public static bool cursorLocked = true;
         private Quaternion camCenter;
 
-        #endregion
+        private float camAngleX;
 
+        #endregion
+        public void OnPhotonSerializeView(PhotonStream p_stream, PhotonMessageInfo p_message)
+        {
+            if (p_stream.IsWriting)
+            {
+                p_stream.SendNext((int)(cam.localEulerAngles.x * 100f));
+            }
+            else
+            {
+                camAngleX = (int)p_stream.ReceiveNext() / 100f;
+            }
+        }
         #region Monobehaviour Callbacks
         void Start()
         {
@@ -36,6 +48,8 @@ namespace Com.Neko.SelfLearning
         {
             if (!photonView.IsMine)
             {
+                cam.localEulerAngles = new Vector3(camAngleX, 0, 0);
+                Debug.Log(camAngleX);
                 return;
             }
             UpdateCursorLock();

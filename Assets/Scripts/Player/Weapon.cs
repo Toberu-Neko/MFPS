@@ -61,7 +61,9 @@ public class Weapon : MonoBehaviourPunCallbacks
                     StartCoroutine(Reload(loadOut[currentIndex].reloadTime));
                 }
             }
-            if (Input.GetKeyDown(KeyCode.R) && !isRealoading && loadOut[currentIndex].GetStash() != 0)
+            if (Input.GetKeyDown(KeyCode.R) && 
+                !isRealoading && loadOut[currentIndex].GetStash() != 0 && 
+                loadOut[currentIndex].GetClip() < loadOut[currentIndex].clipSize)
             {
                 StartCoroutine(Reload(loadOut[currentIndex].reloadTime));
             }
@@ -123,7 +125,6 @@ public class Weapon : MonoBehaviourPunCallbacks
     [PunRPC]
     void Shoot()
     {
-
         Transform t_spawn = transform.Find("Cameras/Normal Camera");
 
         //bloom

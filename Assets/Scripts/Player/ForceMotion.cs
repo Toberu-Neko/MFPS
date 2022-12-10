@@ -74,16 +74,26 @@ namespace Com.Neko.SelfLearning
         //private float adjustedSpeed;
         private Rigidbody rig;
 
-        float startTimer;
         bool isGrounded;
         //bool jump, jumped = false;
 
+        private float aimAngle;
         #endregion
+        /*public void OnPhotonSerializeView(PhotonStream p_stream, PhotonMessageInfo p_message)
+        {
+            if(p_stream.IsWriting)
+            {
+                p_stream.SendNext((int)(weaponParent.transform.localEulerAngles.x * 100f));
+            }
+            else
+            {
+                aimAngle = (int)p_stream.ReceiveNext() / 100f;
+            }
+        }*/
         #region Monobehaviour Callbacks
         void Start()
         {
-            startTimer = 0;
-            cameraParent.SetActive(photonView.IsMine);
+            normalCam.GetComponent<Camera>().enabled = photonView.IsMine;
 
             if (!photonView.IsMine)
             {
@@ -109,13 +119,10 @@ namespace Com.Neko.SelfLearning
         }
         private void Update()
         {
-            if(startTimer <= 1)
-            {
-                startTimer += Time.deltaTime;
-            }
             //Debug.Log(normalCam.fieldOfView);
             if (!photonView.IsMine)
             {
+                //RefreshMultiplayerState();
                 return;
             }
             /*
@@ -286,6 +293,19 @@ namespace Com.Neko.SelfLearning
         }
         #endregion
 
+        private void RefreshMultiplayerState()
+        {
+            float cacheEulY = weaponParent.localEulerAngles.y;
+
+            Quaternion targetRotation = Quaternion.identity * Quaternion.AngleAxis(aimAngle, Vector3.right);
+            weaponParent.rotation = Quaternion.Slerp(weaponParent.rotation, targetRotation, Time.deltaTime * 8f);
+
+            Vector3 finalRotation = weaponParent.localEulerAngles;
+            finalRotation.y = cacheEulY;
+
+            weaponParent.localEulerAngles = finalRotation;
+
+        }
         private void PlayerInput()
         {
             hMove = Input.GetAxisRaw("Horizontal");//¤ô¥­A+1, D-1
