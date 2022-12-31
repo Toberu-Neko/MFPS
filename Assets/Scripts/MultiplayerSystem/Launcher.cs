@@ -5,24 +5,7 @@ using Photon.Pun;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
-    #region Variables
-
-    #endregion
-
-    #region MonoBehaviour Callbacks
-
-    void Start()
-    {
-        
-    }
-
-    void Update()
-    {
-        
-    }
-
-    #endregion
-    public void Awake()
+    public void StartButton()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
         Connect();
