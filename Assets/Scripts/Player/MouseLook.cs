@@ -49,7 +49,7 @@ namespace Com.Neko.SelfLearning
             if (!photonView.IsMine)
             {
                 cam.localEulerAngles = new Vector3(camAngleX, 0, 0);
-                Debug.Log(camAngleX);
+                //Debug.Log(camAngleX);
                 return;
             }
             UpdateCursorLock();

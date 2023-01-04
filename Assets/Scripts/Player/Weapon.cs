@@ -149,9 +149,7 @@ public class Weapon : MonoBehaviourPunCallbacks
                 if(t_hit.collider.gameObject.layer == 11)
                 {
                     //RPC call damage player.
-                    //Debug.Log(t_hit.collider.gameObject.GetPhotonView());
                     t_hit.collider.gameObject.GetPhotonView().RPC("TakeDamage", RpcTarget.All, loadOut[currentIndex].damage);
-                    //playerStatus = t_hit.collider.gameObject.GetComponent<PlayerStatus>(); 
                 }
             }
         }

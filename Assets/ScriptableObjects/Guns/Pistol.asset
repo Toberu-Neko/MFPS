@@ -15,11 +15,11 @@ MonoBehaviour:
   gunName: Pistol
   damage: 10
   fireRate: 0.1
-  ammo: 300
-  clipSize: 8
+  ammo: 999
+  clipSize: 12
   reloadTime: 1.5
   bloom: 20
   recoil: 7
   kickback: 0.1
-  aimSpeed: 7
+  aimSpeed: 5
   prefab: {fileID: 931906088757536372, guid: e50e67a7cf4f1e5498b9c9980f2b5412, type: 3}
