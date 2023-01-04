@@ -1,6 +1,7 @@
 using Photon.Pun;
 using System.Collections;
 using System.Collections.Generic;
+using UnityEngine.SceneManagement;
 using UnityEngine;
 
 namespace Com.Neko.SelfLearning
@@ -18,10 +19,13 @@ namespace Com.Neko.SelfLearning
         public float xSensitivity;
         public float ySensitivity;
 
+        [Header("暫停選單")]
+        private GameObject pauseUI;
+
         [Header("最大上下角度（+-90）")]
         public float maxAngle;
 
-        public static bool cursorLocked = true;
+        public static bool cursorLocked;
         private Quaternion camCenter;
 
         private float camAngleX;
@@ -42,6 +46,9 @@ namespace Com.Neko.SelfLearning
         void Start()
         {
             camCenter = eyes.localRotation;//設定鏡頭+眼睛原始位置
+            pauseUI = UIManager.get.UI.transform.Find("Pause").gameObject;
+            pauseUI.SetActive(false);
+            cursorLocked = true;
         }
 
         void Update()
@@ -53,18 +60,23 @@ namespace Com.Neko.SelfLearning
                 return;
             }
             UpdateCursorLock();
-            SetX();
-            SetY();
+            if(Cursor.lockState == CursorLockMode.Locked)
+            {
+                SetX();
+                SetY();
+            }
         }
         #endregion
 
         #region Private Methods
+
         void UpdateCursorLock()
         {
             if (cursorLocked)
             {
                 Cursor.lockState = CursorLockMode.Locked;
                 Cursor.visible = false;
+                pauseUI.SetActive(false);
 
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
@@ -75,6 +87,8 @@ namespace Com.Neko.SelfLearning
             {
                 Cursor.lockState = CursorLockMode.None;
                 Cursor.visible = true;
+                pauseUI.SetActive(true);
+
                 if (Input.GetKeyDown(KeyCode.Escape))
                 {
                     cursorLocked = true;

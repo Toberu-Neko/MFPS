@@ -25,19 +25,27 @@ public class Weapon : MonoBehaviourPunCallbacks
     void Start()
     {
         playerStatus = GetComponent<PlayerStatus>();
-
-        foreach(Gun gun in loadOut)
+        if (photonView.IsMine)
         {
-            gun.Initalize();
+            foreach (Gun gun in loadOut)
+            {
+                gun.Initalize();
+            }
+            photonView.RPC("Equip", RpcTarget.All, 0);
         }
-        Equip(0);
+
     }
 
     void Update()
     {
         if (!photonView.IsMine)
         {
-            currentWeapon.transform.localPosition = Vector3.Lerp(currentWeapon.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
+            if(currentWeapon == null)
+            {
+                photonView.RPC("Equip", RpcTarget.All, 0);
+            }
+            if(currentWeapon != null)
+             currentWeapon.transform.localPosition = Vector3.Lerp(currentWeapon.transform.localPosition, Vector3.zero, Time.deltaTime * 4f);
             return;
         }
 

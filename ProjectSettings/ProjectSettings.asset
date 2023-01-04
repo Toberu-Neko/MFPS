@@ -12,8 +12,8 @@ PlayerSettings:
   targetDevice: 2
   useOnDemandResources: 0
   accelerometerFrequency: 60
-  companyName: 111-1 self
-  productName: "111-1\u81EA\u4E3B\u5B78\u7FD2"
+  companyName: 111-1 V3B26 SelfLearning
+  productName: "111-1 V3B26 \u81EA\u4E3B\u5B78\u7FD2"
   defaultCursor: {fileID: 0}
   cursorHotspot: {x: 0, y: 0}
   m_SplashScreenBackgroundColor: {r: 0.13725491, g: 0.12156863, b: 0.1254902, a: 1}

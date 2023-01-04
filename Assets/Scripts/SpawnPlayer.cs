@@ -16,11 +16,6 @@ public class SpawnPlayer : MonoBehaviour
         Spawn();
     }
 
-    void Update()
-    {
-        
-    }
-
     #endregion
     public void Spawn()
     {

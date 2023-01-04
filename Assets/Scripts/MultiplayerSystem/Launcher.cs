@@ -5,6 +5,10 @@ using Photon.Pun;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
+    public void ExitGame()
+    {
+        Application.Quit();
+    }
     public void StartButton()
     {
         PhotonNetwork.AutomaticallySyncScene = true;
