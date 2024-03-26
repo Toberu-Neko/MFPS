@@ -1,0 +1,37 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: MainMenu_en
+  m_EditorClassIdentifier: 
+  m_LocaleId:
+    m_Code: en
+  m_SharedData: {fileID: 11400000, guid: 6ed7fd17a49a9ab47b99b91e354cb9e1, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 21182435328
+    m_Localized: 'WASD = Move, Shift = Run.
+
+      C or LCtrl Crouch.
+
+      Mouse
+      LB Shoot.'
+    m_Metadata:
+      m_Items: []
+  - m_Id: 470195261440
+    m_Localized: 'NOTE: Pleas don''t press the "Start" button with another player
+      at the same time. You may be unable to see other player if you do that.'
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []

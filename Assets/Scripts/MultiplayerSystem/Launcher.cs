@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
+using UnityEngine.Localization.Settings;
+using System.ComponentModel.Design;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -59,4 +61,22 @@ public class Launcher : MonoBehaviourPunCallbacks
     #region Private Methods
 
     #endregion
+
+    private bool active = false;
+
+    public void ChangeLocale(int index)
+    {
+        if (active)
+            return;
+
+        StartCoroutine(SetLocale(index));
+    }
+
+    IEnumerator SetLocale(int index)
+    {
+        active = true;
+        yield return LocalizationSettings.InitializationOperation;
+        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.Locales[index];
+        active = false;
+    }
 }
