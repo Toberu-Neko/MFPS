@@ -4,6 +4,7 @@ using UnityEngine;
 using Photon.Pun;
 using UnityEngine.Localization.Settings;
 using System.ComponentModel.Design;
+using Photon.Realtime;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
@@ -16,6 +17,7 @@ public class Launcher : MonoBehaviourPunCallbacks
         PhotonNetwork.AutomaticallySyncScene = true;
         Connect();
     }
+
     public override void OnConnectedToMaster()
     {
         Join();
@@ -25,25 +27,28 @@ public class Launcher : MonoBehaviourPunCallbacks
 
     public override void OnJoinedRoom()
     {
+        Debug.Log("Joined Room");
         StartGame();
 
         base.OnJoinedRoom();
     }
     public override void OnJoinRandomFailed(short returnCode, string message)
     {
-        CreateRoom();
+        Debug.LogError("Failed to join room");
 
         base.OnJoinRandomFailed(returnCode, message);
     }
+
     public void Connect()
     {
         PhotonNetwork.GameVersion = "0.0.0";
         PhotonNetwork.ConnectUsingSettings();
+        PhotonNetwork.JoinLobby();
     }
     public void Join()
     {
+        PhotonNetwork.JoinRandomOrCreateRoom();
         Debug.Log("Joined Room");
-        PhotonNetwork.JoinRandomRoom();
     }
     public void StartGame()
     {
@@ -52,15 +57,6 @@ public class Launcher : MonoBehaviourPunCallbacks
             PhotonNetwork.LoadLevel(1);
         }
     }
-    public void CreateRoom()
-    {
-        Debug.Log("Created Room");
-        PhotonNetwork.CreateRoom("");
-    }
-
-    #region Private Methods
-
-    #endregion
 
     private bool active = false;
 
