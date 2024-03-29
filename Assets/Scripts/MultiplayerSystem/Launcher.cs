@@ -1,10 +1,7 @@
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using Photon.Pun;
 using UnityEngine.Localization.Settings;
-using System.ComponentModel.Design;
-using Photon.Realtime;
 
 public class Launcher : MonoBehaviourPunCallbacks
 {
